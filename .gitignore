@@ -1,5 +1,7 @@
 # Ignore notebook outputs
 *.png
+*.csv
+*.wav
 
 # Ignore Jupyter checkpoints
 .ipynb_checkpoints/
