@@ -1,0 +1,48 @@
+You said:
+I have a note book and I pulled the version numbers of the notebook and put it in a yml file everything ran when I used the yml as the new kernel except I got this one error and I double checked and even used the exact scipy version but im still getting this 
+-------------------------------------------------------------------------- AttributeError Traceback (most recent call last) Cell In[17], line 18 16 # to remove effects at the beginning and end of the data stretch, window the data 17 # https://en.wikipedia.org/wiki/Window_function#Tukey_window ---> 18 try: dwindow = signal.tukey(template.size, alpha=1./8) # Tukey window preferred, but requires recent scipy version 19 except: dwindow = signal.blackman(template.size) # Blackman window OK if Tukey is not available AttributeError: module 'scipy.signal' has no attribute 'tukey' During handling of the above exception, another exception occurred: AttributeError Traceback (most recent call last) Cell In[17], line 19 16 # to remove effects at the beginning and end of the data stretch, window the data 17 # https://en.wikipedia.org/wiki/Window_function#Tukey_window 18 try: dwindow = signal.tukey(template.size, alpha=1./8) # Tukey window preferred, but requires recent scipy version ---> 19 except: dwindow = signal.blackman(template.size) # Blackman window OK if Tukey is not available 21 # prepare the template fft. 22 template_fft = np.fft.fft(template*dwindow) / fs AttributeError: module 'scipy.signal' has no attribute 'blackman'
+
+ChatGPT said:
+I see exactly what’s happening. The error means that your SciPy version doesn’t actually include those window functions where the code expects them.
+
+Why this happens
+scipy.signal.tukey was deprecated and moved.
+
+Same with scipy.signal.blackman.
+Depending on your version of SciPy, these window functions might now live under scipy.signal.windows instead of directly in scipy.signal.
+
+So when your code does:
+
+signal.tukey(...)
+signal.blackman(...)
+SciPy raises AttributeError because those functions aren’t in the top-level signal module anymore.
+
+How to fix it
+You have two options:
+
+Option 1: Update the code to the modern API
+Replace:
+
+signal.tukey(template.size, alpha=1./8)
+signal.blackman(template.size)
+with:
+
+signal.windows.tukey(template.size, alpha=1./8)
+signal.windows.blackman(template.size)
+Option 2: Pin an older SciPy version
+If the assignment or environment expects the old syntax, install a version before the API change (e.g. scipy==0.19.1 or similar). But this can break other parts of your environment, so it’s less ideal unless required by the course.
+
+Recommended (safe) patch
+Update the try/except block like this:
+
+try:
+    dwindow = signal.windows.tukey(template.size, alpha=1./8)
+except AttributeError:
+    dwindow = signal.windows.blackman(template.size)
+👉 Quick check: Run this in your notebook to see what’s available in your version:
+
+import scipy.signal as signal
+dir(signal.windows)
+That will confirm that tukey and blackman live under signal.windows in your SciPy.
+
+Do you want me to help you modify your notebook code so it works across both old and new SciPy versions (backward compatible)? That way it’ll run for graders too no matter what version they have.
