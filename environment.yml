@@ -11,4 +11,6 @@ dependencies:
   - h5py=3.12
   - decorator=5.1
   - ipykernel=6.29
+  - ipython=8.18
   - matplotlib-inline=0.1
+  
